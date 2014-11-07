@@ -13,6 +13,7 @@ SPECIAL_CHAR: #,`,*,[,>;
 >:>TEXT{1+}
 **/
 include('Symbols.php');
+ini_set ( "xdebug.max_nesting_level" , "2147483647" );
 class MarkdownReader
 {
 
@@ -21,26 +22,54 @@ class MarkdownReader
   private $output;
   private $line_count;
   private $current_line;
+  private $full_text;
+  private $full_text_array;
 
   function __construct($source)
   {
     $line_count = 0;
     $current_line = "";
+    $full_text = "";
+
     if(is_file($source))
     {
       $file = fopen($source, "r");
+
       while(!feof($file))
       {
         $line = fgets($file);
-        $this->output .= $this->analyze($line);
+        $this->full_text .= $line;
       }
+
       fclose($file);
     }
-    else
+    else if(is_string($source))
     {
-      //Deal with raw text
+      $this->full_text = $source;
     }
-    //echo $this->output ;
+    $this->parse_r(array_reverse(str_split($this->full_text) ) );
+  }
+
+  function parse_r($text)
+  {
+    $text_array = $text;
+    if(count($text_array) == 0)
+    {
+      return;
+    }
+    //pop off head char
+    $char = $text_array[count($text_array) - 1];
+    array_pop($text_array);
+
+
+
+    $this->parse_r($text_array);
+
+  }
+
+  function pull()
+  {
+
   }
 
   function analyze($line)
