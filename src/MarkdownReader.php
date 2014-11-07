@@ -89,49 +89,48 @@ class MarkdownReader
     }
     if(strpos($char,"#") === 0)
     {
-      //echo Symbols::HASH . PHP_EOL . "<br>";
-      $this->current_node->setNodeType(Symbols::HASH);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::HASH,$char);
       $this->saveNode();
     }
     else if(strpos($char,"`") === 0)
     {
-      //echo Symbols::BACK_TICK . PHP_EOL. "<br>";
-      $this->current_node->setNodeType(Symbols::BACK_TICK);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::BACK_TICK,$char);
       $this->saveNode();
     }
     else if(strpos($char,"*") === 0)
     {
-      //echo Symbols::ASTERIX . PHP_EOL. "<br>";
-      $this->current_node->setNodeType(Symbols::ASTERIX);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::ASTERIX,$char);
       $this->saveNode();
     }
     else if(strpos($char,"[") === 0)
     {
-      //echo Symbols::SQUARE_BRACE_L . PHP_EOL. "<br>";
-      $this->current_node->setNodeType(Symbols::SQUARE_BRACE_L);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::SQUARE_BRACE_L,$char);
+      $this->saveNode();
+    }
+    else if(strpos($char,"]") === 0)
+    {
+      $this->buildNode(Symbols::SQUARE_BRACE_R,$char);
+      $this->saveNode();
+    }
+    else if(strpos($char,"(") === 0)
+    {
+      $this->buildNode(Symbols::BRACE_L,$char);
+      $this->saveNode();
+    }
+    else if(strpos($char,")") === 0)
+    {
+      $this->buildNode(Symbols::BRACE_R,$char);
       $this->saveNode();
     }
     else if(strpos($char,">") === 0)
     {
-      //echo Symbols::POINTY_BRACE_R . PHP_EOL. "<br>";
-      $this->current_node->setNodeType(Symbols::POINTY_BRACE_R);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::POINTY_BRACE_R,$char);
       $this->saveNode();
     }
     else
     {
-      $this->current_node->setNodeType(Symbols::TEXT);
-      $this->partial_node_text.= $char;
-      $this->node_size++;
+      $this->buildNode(Symbols::TEXT,$char);
+
     }
   }
 
@@ -144,6 +143,12 @@ class MarkdownReader
     $this->current_node = new Node();
     $this->partial_node_text = "";
     $this->node_size = 0;
+  }
+  function buildNode($type,$char)
+  {
+    $this->current_node->setNodeType($type);
+    $this->partial_node_text.= $char;
+    $this->node_size++;
   }
 
   function analyzeText($text)
