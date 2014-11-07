@@ -61,6 +61,7 @@ class MarkdownReader
       $this->full_text = $source;
     }
     $this->parse_r(array_reverse(str_split($this->full_text) ) );
+    var_dump($this->ast);
   }
 
   function parse_r($text)
@@ -77,8 +78,6 @@ class MarkdownReader
     $this->partial_node_text .= $this->analyze($char);
 
     $this->parse_r($text_array);
-
-    var_dump($this->ast);
 
   }
   function analyze($char)
@@ -151,44 +150,9 @@ class MarkdownReader
     $this->node_size++;
   }
 
-  function analyzeText($text)
-  {
-    $this->current_line = $text;
-    //Split up characters
-    if(!empty($this->current_line))
-    {
-      $chars = str_split($this->current_line);
-      echo ": ";
-      foreach($chars as $key => $value)
-      {
-        if($value == str_split(Symbols::BACK_TICK)[0])
-        {
-          echo Symbols::BACK_TICK;
-        }
-        else if($value == str_split(Symbols::ASTERIX)[0])
-        {
-          echo Symbols::ASTERIX;
-        }
-        else if($value == str_split(Symbols::SQUARE_BRACE_L)[0])
-        {
-          $this->expect(Symbols::TEXT);
-          $this->expect(Symbols::SQUARE_BRACE_R);
-          $this->expect(Symbols::BRACE_L);
-          $this->expect(Symbols::TEXT);
-          $this->expect(Symbols::BRACE_R);
-        }
-        else if($value == str_split(Symbols::POINTY_BRACE_R)[0])
-        {
-          echo Symbols::POINTY_BRACE_R;
-        }
-      }
-      echo "<br>";
-    }
-  }
 
   function expect($sym)
   {
-
     return true;
   }
   function parse($line)
