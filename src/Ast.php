@@ -6,9 +6,9 @@ class AST
 
   function __construct()
   {
-    $ast = array();
+    $this->ast = array();
   }
-  private function addNode($node)
+  public function addNode($node)
   {
     array_push($this->ast,$node);
   }

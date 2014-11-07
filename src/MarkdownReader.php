@@ -22,22 +22,23 @@ class MarkdownReader
 {
 
 
-  private $raw_text;
   private $output;
   private $line_count;
   private $current_line;
   private $full_text;
-  private $full_text_array;
   private $partial_node_text;
+  private $node_size;
 
   private $ast;
   private $current_node;
 
   function __construct($source)
   {
+    $this->line_count = "";
     $this->line_count = 0;
     $this->current_line = "";
     $this->full_text = "";
+    $this->node_size = 0;
 
     $this->ast = new Ast();
     $this->current_node = new Node();
@@ -49,6 +50,7 @@ class MarkdownReader
       while(!feof($file))
       {
         $line = fgets($file);
+        $this->line_count++;
         $this->full_text .= $line;
       }
 
@@ -76,34 +78,72 @@ class MarkdownReader
 
     $this->parse_r($text_array);
 
+    var_dump($this->ast);
+
   }
   function analyze($char)
   {
+    if(ctype_space($char))
+    {
+      $this->saveNode();
+    }
     if(strpos($char,"#") === 0)
     {
-      echo Symbols::HASH . PHP_EOL . "<br>";
+      //echo Symbols::HASH . PHP_EOL . "<br>";
+      $this->current_node->setNodeType(Symbols::HASH);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
+      $this->saveNode();
     }
     else if(strpos($char,"`") === 0)
     {
-      echo Symbols::BACK_TICK . PHP_EOL. "<br>";
+      //echo Symbols::BACK_TICK . PHP_EOL. "<br>";
+      $this->current_node->setNodeType(Symbols::BACK_TICK);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
+      $this->saveNode();
     }
     else if(strpos($char,"*") === 0)
     {
-      echo Symbols::ASTERIX . PHP_EOL. "<br>";
+      //echo Symbols::ASTERIX . PHP_EOL. "<br>";
+      $this->current_node->setNodeType(Symbols::ASTERIX);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
+      $this->saveNode();
     }
     else if(strpos($char,"[") === 0)
     {
-      echo Symbols::SQUARE_BRACE_L . PHP_EOL. "<br>";
+      //echo Symbols::SQUARE_BRACE_L . PHP_EOL. "<br>";
+      $this->current_node->setNodeType(Symbols::SQUARE_BRACE_L);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
+      $this->saveNode();
     }
     else if(strpos($char,">") === 0)
     {
-      echo Symbols::POINTY_BRACE_R . PHP_EOL. "<br>";
+      //echo Symbols::POINTY_BRACE_R . PHP_EOL. "<br>";
+      $this->current_node->setNodeType(Symbols::POINTY_BRACE_R);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
+      $this->saveNode();
     }
     else
     {
-      echo Symbols::TEXT;
       $this->current_node->setNodeType(Symbols::TEXT);
+      $this->partial_node_text.= $char;
+      $this->node_size++;
     }
+  }
+
+  function saveNode()
+  {
+    $this->current_node->setPayload($this->partial_node_text);
+    $this->current_node->setSize($this->node_size);
+    $this->ast->addNode($this->current_node);
+
+    $this->current_node = new Node();
+    $this->partial_node_text = "";
+    $this->node_size = 0;
   }
 
   function analyzeText($text)
