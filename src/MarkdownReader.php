@@ -13,7 +13,11 @@ SPECIAL_CHAR: #,`,*,[,>;
 >:>TEXT{1+}
 **/
 include('Symbols.php');
+include('Node.php');
+include('Ast.php');
+
 ini_set ( "xdebug.max_nesting_level" , "2147483647" );
+
 class MarkdownReader
 {
 
@@ -24,12 +28,19 @@ class MarkdownReader
   private $current_line;
   private $full_text;
   private $full_text_array;
+  private $partial_node_text;
+
+  private $ast;
+  private $current_node;
 
   function __construct($source)
   {
-    $line_count = 0;
-    $current_line = "";
-    $full_text = "";
+    $this->line_count = 0;
+    $this->current_line = "";
+    $this->full_text = "";
+
+    $this->ast = new Ast();
+    $this->current_node = new Node();
 
     if(is_file($source))
     {
@@ -61,43 +72,37 @@ class MarkdownReader
     $char = $text_array[count($text_array) - 1];
     array_pop($text_array);
 
-
+    $this->partial_node_text .= $this->analyze($char);
 
     $this->parse_r($text_array);
 
   }
-
-  function pull()
+  function analyze($char)
   {
-
-  }
-
-  function analyze($line)
-  {
-    if(strpos($line,"#") === 0)
+    if(strpos($char,"#") === 0)
     {
       echo Symbols::HASH . PHP_EOL . "<br>";
     }
-    else if(strpos($line,"`") === 0)
+    else if(strpos($char,"`") === 0)
     {
       echo Symbols::BACK_TICK . PHP_EOL. "<br>";
     }
-    else if(strpos($line,"*") === 0)
+    else if(strpos($char,"*") === 0)
     {
       echo Symbols::ASTERIX . PHP_EOL. "<br>";
     }
-    else if(strpos($line,"[") === 0)
+    else if(strpos($char,"[") === 0)
     {
       echo Symbols::SQUARE_BRACE_L . PHP_EOL. "<br>";
     }
-    else if(strpos($line,">") === 0)
+    else if(strpos($char,">") === 0)
     {
       echo Symbols::POINTY_BRACE_R . PHP_EOL. "<br>";
     }
     else
     {
       echo Symbols::TEXT;
-      $this->analyzeText($line);
+      $this->current_node->setNodeType(Symbols::TEXT);
     }
   }
 
