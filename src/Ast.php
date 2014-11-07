@@ -12,6 +12,10 @@ class AST
   {
     array_push($this->ast,$node);
   }
+  public function getNodes()
+  {
+    return $this->ast;
+  }
 }
 
 ?>

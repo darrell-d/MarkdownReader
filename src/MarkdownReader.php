@@ -61,7 +61,10 @@ class MarkdownReader
       $this->full_text = $source;
     }
     $this->parse_r(array_reverse(str_split($this->full_text) ) );
-    var_dump($this->ast);
+    foreach($this->ast->getNodes() as $node)
+    {
+      var_dump($node);
+    }
   }
 
   function parse_r($text)
