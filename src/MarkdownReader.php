@@ -15,6 +15,7 @@ SPECIAL_CHAR: #,`,*,[,>;
 include('Symbols.php');
 include('Node.php');
 include('Ast.php');
+include('Builder.php');
 
 ini_set ( "xdebug.max_nesting_level" , "2147483647" );
 
@@ -30,7 +31,7 @@ class MarkdownReader
   private $node_size;
 
   private $ast;
-  private $current_node;
+  private $builder;
 
   function __construct($source)
   {
@@ -42,7 +43,11 @@ class MarkdownReader
 
     $this->ast = new Ast();
     $this->current_node = new Node();
+    $this->builder = new Builder();
+
     $firstNode = new Node();
+
+
     $firstNode->setNodeType(Symbols::MARKDOWN);
 
     if(is_file($source))
@@ -56,6 +61,7 @@ class MarkdownReader
         $this->full_text .= $line;
       }
       $firstNode->setSize(filesize($source));
+      $firstNode->setPayload($this->full_text);
 
       fclose($file);
     }
@@ -65,16 +71,26 @@ class MarkdownReader
       $firstNode->setSize(count($source));
     }
 
-    $firstNode->setPayload($source);
     $this->ast->addNode($firstNode);
 
     $this->parse_r(array_reverse(str_split($this->full_text) ) );
-    foreach($this->ast->getNodes() as $node)
-    {
-      var_dump($node);
-    }
+
+    $this->builder->setAST($this->ast);
+    $this->builder->build();
   }
 
+  function validate()
+  {
+      $nodes = array_reverse($this->ast->getNodes());
+      $length = count($nodes);
+      $current = array_pop($nodes);
+
+      $this->expect(Symbols::MARKDOWN, $current);
+
+
+  }
+
+  /*Parse the text content recursively*/
   function parse_r($text)
   {
     $text_array = $text;
