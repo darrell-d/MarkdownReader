@@ -42,6 +42,8 @@ class MarkdownReader
 
     $this->ast = new Ast();
     $this->current_node = new Node();
+    $firstNode = new Node();
+    $firstNode->setNodeType(Symbols::MARKDOWN);
 
     if(is_file($source))
     {
@@ -53,13 +55,19 @@ class MarkdownReader
         $this->line_count++;
         $this->full_text .= $line;
       }
+      $firstNode->setSize(filesize($source));
 
       fclose($file);
     }
     else if(is_string($source))
     {
       $this->full_text = $source;
+      $firstNode->setSize(count($source));
     }
+
+    $firstNode->setPayload($source);
+    $this->ast->addNode($firstNode);
+
     $this->parse_r(array_reverse(str_split($this->full_text) ) );
     foreach($this->ast->getNodes() as $node)
     {

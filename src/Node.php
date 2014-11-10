@@ -20,7 +20,7 @@ class Node
   }
   function setSize($size)
   {
-    $this->size = $size;
+    $this->node_size = $size;
   }
 
   function getNodeType()
@@ -33,7 +33,7 @@ class Node
   }
   function getSize()
   {
-    return $this->size();
+    return $this->node_size();
   }
 }
 ?>
